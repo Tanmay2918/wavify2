@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wavify — Pure Sound, Subtle Elegance</title>
+  <meta name="description" content="Wavify is a minimalist, subtle music streaming web experience. Discover curated tracks across Hindi, English, Punjabi, Haryanvi and Lo-Fi." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="wavify.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════
+       APP LOADER
+       ══════════════════════════════════════════════ -->
+  <div id="appLoader" class="app-loader">
+    <div class="loader-content">
+      <div class="loader-brand">
+        <div class="brand-wave-icon">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="brand-text">Wavify</span>
+      </div>
+      <p class="loader-tagline">Tuning your acoustic space…</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       FULL-SCREEN AUTH / LOGIN PAGE MODAL
+       ══════════════════════════════════════════════ -->
+  <div class="auth-wrapper" id="authWrapper" aria-modal="true" role="dialog">
+    <div class="auth-backdrop" onclick="AuthModule.closeAuthModal()"></div>
+    <div class="auth-card">
+      <button class="auth-close-btn" onclick="AuthModule.closeAuthModal()" title="Close / Continue as Guest" id="authCloseBtn">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="auth-header">
+        <div class="auth-brand">
+          <div class="brand-wave-icon small">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span class="auth-brand-name">Wavify</span>
+        </div>
+        <h2 id="authTitle">Welcome to Wavify</h2>
+        <p id="authSubtitle" class="auth-subtitle">Sign in to sync your playlists, favorites & hi-res audio.</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tabLogin" onclick="AuthModule.switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tabSignup" onclick="AuthModule.switchTab('signup')">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="formLogin" class="auth-form" onsubmit="AuthModule.handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="fa-regular fa-envelope"></i>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label for="loginPassword">Password</label>
+            <a href="#" class="forgot-link" onclick="AuthModule.handleForgotPassword(event)">Forgot?</a>
+          </div>
+          <div class="input-icon-wrap">
+            <i class="fa-regular fa-lock"></i>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
+            <button type="button" class="pw-eye" onclick="AuthModule.togglePasswordVisibility('loginPassword', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" id="rememberMe" checked />
+            <span class="custom-check"></span>
+            <span class="check-label">Remember me</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-subtle-primary full-width" id="btnLoginSubmit">
+          <span>Sign In</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <div class="social-auth-separator">
+          <span>or continue with</span>
+        </div>
+
+        <div class="social-auth-grid">
+          <button type="button" class="btn-social" onclick="AuthModule.mockSocialLogin('Google')">
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+          <button type="button" class="btn-social" onclick="AuthModule.mockSocialLogin('Apple')">
+            <i class="fa-brands fa-apple"></i> Apple
+          </button>
+        </div>
+
+        <div class="guest-skip-wrap">
+          <button type="button" class="btn-text-muted" onclick="AuthModule.continueAsGuest()">
+            Continue as Guest <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="formSignup" class="auth-form hidden" onsubmit="AuthModule.handleSignup(event)">
+        <div class="form-group">
+          <label for="signupName">Full Name or Nickname</label>
+          <div class="input-icon-wrap">
+            <i class="fa-regular fa-user"></i>
+            <input type="text" id="signupName" placeholder="Aria Vance" required autocomplete="name" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="fa-regular fa-envelope"></i>
+            <input type="email" id="signupEmail" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">Create Password</label>
+          <div class="input-icon-wrap">
+            <i class="fa-regular fa-lock"></i>
+            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required autocomplete="new-password" />
+            <button type="button" class="pw-eye" onclick="AuthModule.togglePasswordVisibility('signupPassword', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input type="checkbox" id="termsCheck" required />
+            <span class="custom-check"></span>
+            <span class="check-label">I agree to Wavify's <a href="#about" onclick="AuthModule.closeAuthModal()">Terms of Service</a></span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-subtle-primary full-width" id="btnSignupSubmit">
+          <span>Create Free Account</span>
+          <i class="fa-solid fa-sparkles"></i>
+        </button>
+
+        <div class="guest-skip-wrap">
+          <button type="button" class="btn-text-muted" onclick="AuthModule.switchTab('login')">
+            Already have an account? <strong>Sign In</strong>
+          </button>
+        </div>
+      </form>
+
+      <!-- Feedback Toast -->
+      <div id="authAlert" class="auth-alert hidden"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       SUBSCRIPTION UPGRADE MODAL / CHECKOUT SIMULATOR
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="checkoutModal" aria-modal="true" role="dialog">
+    <div class="modal-card checkout-card">
+      <button class="auth-close-btn" onclick="SubscriptionModule.closeCheckout()"><i class="fa-solid fa-xmark"></i></button>
+      <div class="checkout-header">
+        <span class="checkout-badge"><i class="fa-solid fa-gem"></i> Wavify Premium</span>
+        <h3 id="checkoutPlanTitle">Upgrade to Studio Hi-Res</h3>
+        <p id="checkoutPlanPrice" class="checkout-price">$9.99 / month</p>
+      </div>
+
+      <div class="checkout-perks" id="checkoutPerks">
+        <div><i class="fa-solid fa-check"></i> Lossless 24-bit/192kHz Audio Quality</div>
+        <div><i class="fa-solid fa-check"></i> 100% Ad-Free Uninterrupted Listening</div>
+        <div><i class="fa-solid fa-check"></i> Unlimited Skips & Offline Sync</div>
+      </div>
+
+      <form id="checkoutForm" onsubmit="SubscriptionModule.processPayment(event)">
+        <div class="form-group">
+          <label>Payment Method</label>
+          <div class="payment-method-selector">
+            <label class="pay-option selected">
+              <input type="radio" name="payMethod" value="card" checked />
+              <i class="fa-regular fa-credit-card"></i> Card
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="payMethod" value="upi" />
+              <i class="fa-solid fa-bolt"></i> UPI / Pay
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="payMethod" value="paypal" />
+              <i class="fa-brands fa-paypal"></i> PayPal
+            </label>
+          </div>
+        </div>
+
+        <div id="cardFields">
+          <div class="form-group">
+            <label>Card Number</label>
+            <div class="input-icon-wrap">
+              <i class="fa-regular fa-credit-card"></i>
+              <input type="text" placeholder="4242 •••• •••• 4242" value="4242 •••• •••• 9012" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expiry</label>
+              <input type="text" placeholder="MM/YY" value="08/28" />
+            </div>
+            <div class="form-group">
+              <label>CVC</label>
+              <input type="text" placeholder="CVC" value="888" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-subtle-primary full-width" id="btnConfirmPay">
+          <i class="fa-solid fa-lock"></i> Activate Plan (Mock Checkout)
+        </button>
+        <p class="checkout-disclaimer">Zero charges will occur. This is a frontend demo project simulation.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       NEW PLAYLIST MODAL
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="createPlaylistModal">
+    <div class="modal-card small">
+      <button class="auth-close-btn" onclick="PlaylistModule.closeCreateModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3>Create New Playlist</h3>
+      <p class="modal-sub">Curate your personal sound collection.</p>
+      <form onsubmit="PlaylistModule.handleCreateSubmit(event)">
+        <div class="form-group">
+          <label>Playlist Name</label>
+          <input type="text" id="newPlTitle" placeholder="Midnight Lo-Fi, Rain Study..." required maxlength="40" />
+        </div>
+        <div class="form-group">
+          <label>Pick Cover Accent</label>
+          <div class="color-picker-row" id="plColorPickers">
+            <button type="button" class="color-dot active" data-color="amber" style="background: #d4a373;"></button>
+            <button type="button" class="color-dot" data-color="slate" style="background: #64748b;"></button>
+            <button type="button" class="color-dot" data-color="indigo" style="background: #6366f1;"></button>
+            <button type="button" class="color-dot" data-color="emerald" style="background: #10b981;"></button>
+            <button type="button" class="color-dot" data-color="rose" style="background: #f43f5e;"></button>
+          </div>
+        </div>
+        <button type="submit" class="btn-subtle-primary full-width">Create Playlist</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       ADD TO PLAYLIST MODAL
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="addToPlaylistModal">
+    <div class="modal-card small">
+      <button class="auth-close-btn" onclick="PlaylistModule.closeAddToModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3>Add to Playlist</h3>
+      <p class="modal-sub" id="addToSongTitle">Select destination playlist</p>
+      <div class="modal-playlist-list" id="addToPlContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MAIN APP LAYOUT
+       ══════════════════════════════════════════════ -->
+  <div class="app-layout">
+
+    <!-- ── SIDEBAR NAVIGATION ── -->
+    <aside class="sidebar" id="appSidebar">
+      <!-- Sidebar Brand -->
+      <div class="sidebar-header">
+        <a href="#home" class="sidebar-logo" onclick="NavigationModule.navigate('home')">
+          <div class="brand-wave-icon small">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span class="logo-name">Wavify</span>
+        </a>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-menu">
+        <span class="menu-heading">DISCOVER</span>
+        <a href="#home" class="nav-item active" data-section="home" onclick="NavigationModule.navigate('home', event)">
+          <i class="fa-solid fa-compass"></i>
+          <span>Home</span>
+        </a>
+        <a href="#browse" class="nav-item" data-section="browse" onclick="NavigationModule.navigate('browse', event)">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Search & Browse</span>
+        </a>
+        <a href="#artists" class="nav-item" data-section="artists" onclick="NavigationModule.navigate('artists', event)">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>Artists</span>
+        </a>
+
+        <span class="menu-heading">YOUR MUSIC</span>
+        <a href="#library" class="nav-item" data-section="library" onclick="NavigationModule.navigate('library', event)">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>Library</span>
+        </a>
+        <a href="#favorites" class="nav-item" data-section="favorites" onclick="NavigationModule.navigate('favorites', event)">
+          <i class="fa-solid fa-heart"></i>
+          <span>Liked Songs</span>
+          <span class="badge-count" id="likedCountBadge">0</span>
+        </a>
+        <a href="#playlists" class="nav-item" data-section="playlists" onclick="NavigationModule.navigate('playlists', event)">
+          <i class="fa-solid fa-list-ul"></i>
+          <span>Playlists</span>
+        </a>
+
+        <span class="menu-heading">UPGRADE & INFO</span>
+        <a href="#subscription" class="nav-item subscription-nav" data-section="subscription" onclick="NavigationModule.navigate('subscription', event)">
+          <i class="fa-solid fa-crown"></i>
+          <span>Premium Plans</span>
+          <span class="pill-badge">PRO</span>
+        </a>
+        <a href="#about" class="nav-item" data-section="about" onclick="NavigationModule.navigate('about', event)">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About Project</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Mini Premium Banner -->
+      <div class="sidebar-pro-card" id="sidebarUpgradePrompt">
+        <div class="pro-sparkle"><i class="fa-solid fa-sparkles"></i></div>
+        <h4>Lossless Fidelity</h4>
+        <p>Unlock 24-bit FLAC clarity & zero ads.</p>
+        <button class="btn-mini-upgrade" onclick="NavigationModule.navigate('subscription')">View Plans</button>
+      </div>
+
+      <!-- User Profile Footbar -->
+      <div class="sidebar-footer">
+        <div class="user-profile-pill" id="sidebarUserPill">
+          <div class="user-avatar" id="sidebarUserAvatar">G</div>
+          <div class="user-meta">
+            <span class="user-display-name" id="sidebarUserName">Guest Explorer</span>
+            <span class="user-tier-tag" id="sidebarUserTier">FREE TIER</span>
+          </div>
+          <button class="user-action-btn" id="sidebarAuthTrigger" onclick="AuthModule.openAuthModal()" title="Sign In / Account">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── TOP BAR / HEADER ── -->
+    <header class="top-nav">
+      <div class="top-left">
+        <button class="btn-icon mobile-menu-toggle" id="mobileMenuBtn" onclick="NavigationModule.toggleMobileSidebar()" title="Toggle Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="nav-history-arrows">
+          <button class="btn-icon circle" onclick="window.history.back()" title="Back"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="btn-icon circle" onclick="window.history.forward()" title="Forward"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <div class="global-search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="globalSearchInput" placeholder="Search tracks, artists, moods (e.g., Arijit, Lo-Fi, Diljit)..." autocomplete="off" />
+          <button class="clear-search-btn hidden" id="clearSearchBtn" onclick="SearchModule.clearSearch()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <div class="top-right">
+        <!-- Theme Toggle -->
+        <button class="theme-switch-btn" id="themeSwitchBtn" onclick="ThemeModule.toggleTheme()" title="Switch Light/Dark Mood">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+          <span id="themeLabelText">Dark</span>
+        </button>
+
+        <!-- Premium Button -->
+        <button class="btn-subtle-outline" onclick="NavigationModule.navigate('subscription')">
+          <i class="fa-solid fa-gem"></i>
+          <span>Plans</span>
+        </button>
+
+        <!-- User Profile Dropdown Button -->
+        <div class="user-dropdown-wrap">
+          <button class="btn-user-avatar" id="topUserBtn" onclick="AuthModule.toggleUserMenu()">
+            <span class="avatar-initial" id="topAvatarInitial">G</span>
+          </button>
+          <div class="dropdown-menu hidden" id="userMenuDropdown">
+            <div class="dropdown-header">
+              <p class="dropdown-user-name" id="menuUserName">Guest Explorer</p>
+              <span class="dropdown-email" id="menuUserEmail">Not signed in</span>
+            </div>
+            <hr class="dropdown-divider" />
+            <a href="#subscription" onclick="NavigationModule.navigate('subscription'); AuthModule.closeUserMenu();" class="dropdown-item">
+              <i class="fa-solid fa-crown"></i> Membership Plan
+            </a>
+            <a href="#favorites" onclick="NavigationModule.navigate('favorites'); AuthModule.closeUserMenu();" class="dropdown-item">
+              <i class="fa-solid fa-heart"></i> Liked Tracks
+            </a>
+            <hr class="dropdown-divider" />
+            <button class="dropdown-item" id="menuAuthAction" onclick="AuthModule.handleUserMenuAuthAction()">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In / Register
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── MAIN VIEWPORT ── -->
+    <main class="main-viewport" id="mainViewport">
+
+      <!-- ══════════════ SECTION: HOME ══════════════ -->
+      <section id="secHome" class="view-section active">
+        <!-- Hero Subtle Acoustic Showcase -->
+        <div class="subtle-hero">
+          <div class="hero-backdrop-glow"></div>
+          <div class="hero-content">
+            <div class="hero-pill"><i class="fa-solid fa-waveform-lines"></i> High Fidelity Spatial Audio</div>
+            <h1 class="hero-title">Music designed for deep focus & pure emotion.</h1>
+            <p class="hero-description">
+              Stream handpicked melodies across Hindi, English, Punjabi, Haryanvi and Lo-Fi in breathtaking acoustic clarity.
+            </p>
+            <div class="hero-actions">
+              <button class="btn-subtle-primary" onclick="AudioPlayer.playFirstTrack()">
+                <i class="fa-solid fa-play"></i> Listen Now
+              </button>
+              <button class="btn-subtle-secondary" onclick="NavigationModule.navigate('browse')">
+                <i class="fa-solid fa-layer-group"></i> Explore Categories
+              </button>
+            </div>
+          </div>
+
+          <!-- Hero Visualizer Ornament -->
+          <div class="hero-visualizer-card">
+            <div class="vinyl-minimal" id="heroVinyl">
+              <div class="vinyl-groove"></div>
+              <div class="vinyl-label">
+                <div class="vinyl-dot"></div>
+              </div>
+            </div>
+            <div class="hero-visualizer-meta">
+              <span class="now-vibe-tag">ACOUSTIC CURATION</span>
+              <h4 id="heroVibeSongName">Kesariya (Pure Acoustic)</h4>
+              <p id="heroVibeArtist">Arijit Singh · 320kbps</p>
+              <div class="minimal-wave-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Mood / Language Chips -->
+        <div class="section-container">
+          <div class="section-heading-row">
+            <h2 class="section-title">Sound Landscapes</h2>
+            <button class="btn-link" onclick="NavigationModule.navigate('browse')">View All Categories</button>
+          </div>
+          <div class="genre-cards-grid">
+            <div class="genre-card hindi-card" onclick="BrowseModule.selectCategory('hindi')">
+              <div class="genre-info">
+                <h3>Hindi Curation</h3>
+                <p>Arijit, Anuv Jain & Bollywood</p>
+              </div>
+              <span class="genre-emoji">🪕</span>
+            </div>
+            <div class="genre-card english-card" onclick="BrowseModule.selectCategory('english')">
+              <div class="genre-info">
+                <h3>Global Hits</h3>
+                <p>Taylor Swift & Billboard Essentials</p>
+              </div>
+              <span class="genre-emoji">🎧</span>
+            </div>
+            <div class="genre-card punjabi-card" onclick="BrowseModule.selectCategory('punjabi')">
+              <div class="genre-info">
+                <h3>Punjabi Waves</h3>
+                <p>AP Dhillon, Diljit & Karan Aujla</p>
+              </div>
+              <span class="genre-emoji">🥁</span>
+            </div>
+            <div class="genre-card haryanvi-card" onclick="BrowseModule.selectCategory('haryanvi')">
+              <div class="genre-info">
+                <h3>Haryanvi Top Beats</h3>
+                <p>Dhanda Nyoliwala & Mitta Ror</p>
+              </div>
+              <span class="genre-emoji">⚡</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured Tracks Grid -->
+        <div class="section-container">
+          <div class="section-heading-row">
+            <div>
+              <h2 class="section-title">Editor's Daily Selection</h2>
+              <p class="section-subtitle">Balanced dynamics & warm soundscapes.</p>
+            </div>
+            <div class="track-filter-chips" id="homeGenreFilter">
+              <button class="filter-chip active" data-filter="all" onclick="HomeModule.filterFeatured('all')">All</button>
+              <button class="filter-chip" data-filter="hindi" onclick="HomeModule.filterFeatured('hindi')">Hindi</button>
+              <button class="filter-chip" data-filter="english" onclick="HomeModule.filterFeatured('english')">English</button>
+              <button class="filter-chip" data-filter="punjabi" onclick="HomeModule.filterFeatured('punjabi')">Punjabi</button>
+              <button class="filter-chip" data-filter="haryanvi" onclick="HomeModule.filterFeatured('haryanvi')">Haryanvi</button>
+            </div>
+          </div>
+          <div class="songs-grid" id="homeFeaturedGrid">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+
+        <!-- Featured Artists Row -->
+        <div class="section-container">
+          <div class="section-heading-row">
+            <div>
+              <h2 class="section-title">Spotlight Artists</h2>
+              <p class="section-subtitle">Creators shaping the contemporary soundscape.</p>
+            </div>
+            <button class="btn-link" onclick="NavigationModule.navigate('artists')">All Artists <i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div class="artists-grid-compact" id="homeArtistsGrid">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+
+        <!-- Curated Playlists Showcase -->
+        <div class="section-container">
+          <div class="section-heading-row">
+            <h2 class="section-title">Signature Playlists</h2>
+            <button class="btn-link" onclick="NavigationModule.navigate('playlists')">All Playlists</button>
+          </div>
+          <div class="playlists-grid" id="homePlaylistsGrid">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: BROWSE & SEARCH ══════════════ -->
+      <section id="secBrowse" class="view-section">
+        <div class="browse-header">
+          <h2 class="section-title">Search & Explore</h2>
+          <p class="section-subtitle">Browse through entire song database, search queries, and curated filters.</p>
+        </div>
+
+        <div class="browse-controls-bar">
+          <div class="browse-category-tabs" id="browseCategoryTabs">
+            <button class="tab-btn active" data-cat="all" onclick="BrowseModule.selectCategory('all')">All Songs (28+)</button>
+            <button class="tab-btn" data-cat="hindi" onclick="BrowseModule.selectCategory('hindi')">Hindi</button>
+            <button class="tab-btn" data-cat="english" onclick="BrowseModule.selectCategory('english')">English</button>
+            <button class="tab-btn" data-cat="punjabi" onclick="BrowseModule.selectCategory('punjabi')">Punjabi</button>
+            <button class="tab-btn" data-cat="haryanvi" onclick="BrowseModule.selectCategory('haryanvi')">Haryanvi</button>
+          </div>
+
+          <div class="browse-sort-wrap">
+            <span class="sort-label">Sort by:</span>
+            <select id="browseSortSelect" onchange="BrowseModule.handleSort(this.value)">
+              <option value="default">Default Order</option>
+              <option value="name">Title (A-Z)</option>
+              <option value="artist">Artist Name</option>
+              <option value="category">Language / Genre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="songs-grid" id="browseSongsGrid">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: ARTISTS ══════════════ -->
+      <section id="secArtists" class="view-section">
+        <div class="section-heading-row" id="artistsMainHeader">
+          <div>
+            <h2 class="section-title">Featured Vocalists & Producers</h2>
+            <p class="section-subtitle">Click any artist to explore their discography & curated tracks.</p>
+          </div>
+        </div>
+
+        <!-- Artists Grid View -->
+        <div class="artists-grid" id="artistsFullGrid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Single Artist Detail View (Hidden by default) -->
+        <div class="artist-detail-view hidden" id="artistDetailView">
+          <button class="btn-subtle-secondary mb-4" onclick="ArtistModule.backToAllArtists()">
+            <i class="fa-solid fa-arrow-left"></i> Back to Artists
+          </button>
+          
+          <div class="artist-banner" id="artistDetailBanner">
+            <div class="artist-banner-img-wrap">
+              <img id="artistDetailImg" src="" alt="Artist banner" />
+            </div>
+            <div class="artist-banner-info">
+              <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified Artist</span>
+              <h1 id="artistDetailName">Artist Name</h1>
+              <p id="artistDetailGenre" class="artist-detail-genre">Genre</p>
+              <p id="artistDetailBio" class="artist-detail-bio">Bio description...</p>
+              <div class="artist-detail-actions">
+                <button class="btn-subtle-primary" id="btnPlayArtistTracks"><i class="fa-solid fa-play"></i> Play Top Songs</button>
+                <button class="btn-subtle-outline" id="btnFollowArtist" onclick="ArtistModule.toggleFollow()"><i class="fa-regular fa-heart"></i> Follow</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-container">
+            <h3 class="section-title">Popular Tracks</h3>
+            <div class="songs-grid" id="artistDetailSongsGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: LIBRARY ══════════════ -->
+      <section id="secLibrary" class="view-section">
+        <div class="section-heading-row">
+          <div>
+            <h2 class="section-title">Your Acoustic Library</h2>
+            <p class="section-subtitle">Quick access to your liked songs, custom playlists, and listening history.</p>
+          </div>
+          <button class="btn-subtle-primary" onclick="PlaylistModule.openCreateModal()">
+            <i class="fa-solid fa-plus"></i> New Playlist
+          </button>
+        </div>
+
+        <div class="library-summary-cards">
+          <div class="lib-card" onclick="NavigationModule.navigate('favorites')">
+            <div class="lib-icon heart"><i class="fa-solid fa-heart"></i></div>
+            <div class="lib-info">
+              <h3>Liked Songs</h3>
+              <p><span id="libLikedCount">0</span> tracks favorited</p>
+            </div>
+          </div>
+          <div class="lib-card" onclick="NavigationModule.navigate('playlists')">
+            <div class="lib-icon playlist"><i class="fa-solid fa-list-music"></i></div>
+            <div class="lib-info">
+              <h3>Custom Playlists</h3>
+              <p><span id="libPlCount">4</span> collections</p>
+            </div>
+          </div>
+          <div class="lib-card" onclick="NavigationModule.navigate('subscription')">
+            <div class="lib-icon crown"><i class="fa-solid fa-crown"></i></div>
+            <div class="lib-info">
+              <h3>Plan Tier</h3>
+              <p id="libUserPlanText">Free Acoustic Access</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-container mt-6">
+          <h3 class="section-title">Recent Listening</h3>
+          <div class="songs-grid" id="libraryRecentGrid">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: FAVORITES (LIKED SONGS) ══════════════ -->
+      <section id="secFavorites" class="view-section">
+        <div class="playlist-hero-banner liked-banner">
+          <div class="playlist-banner-art">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <div class="playlist-banner-details">
+            <span class="banner-tag">AUTO PLAYLIST</span>
+            <h1>Liked Songs</h1>
+            <p id="favHeroSub">Tracks you've given a heart to. Stored locally on your browser.</p>
+            <div class="banner-actions">
+              <button class="btn-subtle-primary" id="btnPlayAllLiked" onclick="FavoritesModule.playAllLiked()">
+                <i class="fa-solid fa-play"></i> Play Favorites
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-container">
+          <div class="songs-grid" id="favoritesSongsGrid">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: PLAYLISTS ══════════════ -->
+      <section id="secPlaylists" class="view-section">
+        <div class="section-heading-row">
+          <div>
+            <h2 class="section-title">Curated & Custom Playlists</h2>
+            <p class="section-subtitle">Create mixes for deep focus, travel, or unwinding.</p>
+          </div>
+          <button class="btn-subtle-primary" onclick="PlaylistModule.openCreateModal()">
+            <i class="fa-solid fa-plus"></i> Create Playlist
+          </button>
+        </div>
+
+        <div class="playlists-grid" id="playlistsGridContainer">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- Single Playlist Songs View (Hidden by default) -->
+        <div class="playlist-detail-view hidden" id="playlistDetailView">
+          <button class="btn-subtle-secondary mb-4" onclick="PlaylistModule.backToAllPlaylists()">
+            <i class="fa-solid fa-arrow-left"></i> Back to All Playlists
+          </button>
+
+          <div class="playlist-hero-banner" id="playlistHeroBanner">
+            <div class="playlist-banner-art custom" id="plDetailCover">🎵</div>
+            <div class="playlist-banner-details">
+              <span class="banner-tag" id="plDetailTag">CURATED PLAYLIST</span>
+              <h1 id="plDetailTitle">Top Hits</h1>
+              <p id="plDetailMeta">8 Tracks · Handpicked for Wavify</p>
+              <div class="banner-actions">
+                <button class="btn-subtle-primary" id="btnPlayThisPlaylist"><i class="fa-solid fa-play"></i> Play All</button>
+                <button class="btn-subtle-outline hidden" id="btnDeleteCustomPlaylist" onclick="PlaylistModule.deleteActivePlaylist()">
+                  <i class="fa-solid fa-trash"></i> Delete Playlist
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-container">
+            <div class="songs-grid" id="playlistDetailSongsGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: SUBSCRIPTION PLANS ══════════════ -->
+      <section id="secSubscription" class="view-section">
+        <div class="sub-pricing-header">
+          <span class="pricing-badge"><i class="fa-solid fa-sparkles"></i> WAVIFY PASS</span>
+          <h1 class="pricing-title">Simple, transparent sound tiers.</h1>
+          <p class="pricing-subtitle">Experience audio unconstrained by bitrate caps, compression, or advertisements.</p>
+
+          <!-- Billing Period Switch -->
+          <div class="billing-toggle-wrap">
+            <span class="billing-label" id="monthlyLabel">Monthly</span>
+            <label class="switch-control">
+              <input type="checkbox" id="billingCycleSwitch" onchange="SubscriptionModule.toggleBillingCycle(this.checked)" />
+              <span class="switch-slider"></span>
+            </label>
+            <span class="billing-label" id="yearlyLabel">Yearly</span>
+            <span class="save-pill">SAVE 20%</span>
+          </div>
+        </div>
+
+        <!-- Pricing Cards Grid -->
+        <div class="pricing-grid">
+          <!-- Tier 1: Free -->
+          <div class="pricing-card" id="tierCardFree">
+            <div class="card-header-tier">
+              <h3 class="tier-name">Wavify Free</h3>
+              <p class="tier-desc">Essential casual streaming for students & daily study.</p>
+            </div>
+            <div class="tier-price-box">
+              <span class="currency">$</span>
+              <span class="price-val">0</span>
+              <span class="period">/ forever</span>
+            </div>
+            <div class="tier-features-list">
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Standard Audio (160kbps MP3)</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Access to all Hindi, Global & Regional catalog</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Unlimited custom playlist creation</div>
+              <div class="feature-item muted"><i class="fa-solid fa-xmark"></i> Zero Ads & Sponsor-free</div>
+              <div class="feature-item muted"><i class="fa-solid fa-xmark"></i> Lossless 24-bit FLAC clarity</div>
+              <div class="feature-item muted"><i class="fa-solid fa-xmark"></i> Offline downloads mode</div>
+            </div>
+            <button class="btn-tier-select current" disabled id="btnTierFree">Current Plan</button>
+          </div>
+
+          <!-- Tier 2: Plus -->
+          <div class="pricing-card" id="tierCardPlus">
+            <div class="card-header-tier">
+              <h3 class="tier-name">Wavify Plus</h3>
+              <p class="tier-desc">For serious listeners who demand high-bitrate clarity.</p>
+            </div>
+            <div class="tier-price-box">
+              <span class="currency">$</span>
+              <span class="price-val" id="plusPriceVal">4.99</span>
+              <span class="period" id="plusPeriodVal">/ month</span>
+            </div>
+            <div class="tier-features-list">
+              <div class="feature-item"><i class="fa-solid fa-check"></i> High Quality Audio (320kbps AAC)</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> 100% Ad-Free uninterrupted playback</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Unlimited track skips & fast scrubbing</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Real-time synced lyrics display</div>
+              <div class="feature-item muted"><i class="fa-solid fa-xmark"></i> Lossless Studio Master FLAC</div>
+              <div class="feature-item muted"><i class="fa-solid fa-xmark"></i> Multi-device Family sharing</div>
+            </div>
+            <button class="btn-tier-select" onclick="SubscriptionModule.openCheckout('Wavify Plus', 4.99)">
+              Upgrade to Plus
+            </button>
+          </div>
+
+          <!-- Tier 3: Studio / Hi-Res (POPULAR) -->
+          <div class="pricing-card featured" id="tierCardStudio">
+            <div class="popular-ribbon"><i class="fa-solid fa-gem"></i> MOST POPULAR</div>
+            <div class="card-header-tier">
+              <h3 class="tier-name">Studio Master Hi-Res</h3>
+              <p class="tier-desc">The audiophile dream. Studio master lossless dynamics.</p>
+            </div>
+            <div class="tier-price-box">
+              <span class="currency">$</span>
+              <span class="price-val" id="studioPriceVal">9.99</span>
+              <span class="period" id="studioPeriodVal">/ month</span>
+            </div>
+            <div class="tier-features-list">
+              <div class="feature-item"><i class="fa-solid fa-check"></i> <strong>Lossless FLAC 24-bit / 192kHz</strong></div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Spatial Sound & Acoustic simulation</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> 100% Ad-Free with priority bandwidth</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Unlimited offline caching simulation</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Hi-Res DAC bypass equalizer presets</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Early access to new platform releases</div>
+            </div>
+            <button class="btn-tier-select primary" onclick="SubscriptionModule.openCheckout('Studio Master Hi-Res', 9.99)">
+              Start 30-Day Free Trial
+            </button>
+          </div>
+
+          <!-- Tier 4: Family -->
+          <div class="pricing-card" id="tierCardFamily">
+            <div class="card-header-tier">
+              <h3 class="tier-name">Wavify Family</h3>
+              <p class="tier-desc">Full Studio Hi-Res access for up to 6 family members.</p>
+            </div>
+            <div class="tier-price-box">
+              <span class="currency">$</span>
+              <span class="price-val" id="familyPriceVal">14.99</span>
+              <span class="period" id="familyPeriodVal">/ month</span>
+            </div>
+            <div class="tier-features-list">
+              <div class="feature-item"><i class="fa-solid fa-check"></i> 6 Separate individual accounts</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> All Studio Hi-Res 24-bit features included</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Shared family collaborative playlist</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Explicit lyrics filter toggle for kids</div>
+              <div class="feature-item"><i class="fa-solid fa-check"></i> Simultaneous streaming on multiple screens</div>
+            </div>
+            <button class="btn-tier-select" onclick="SubscriptionModule.openCheckout('Wavify Family', 14.99)">
+              Get Family Plan
+            </button>
+          </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="pricing-faq-wrap">
+          <h2 class="section-title text-center">Frequently Asked Questions</h2>
+          <div class="faq-accordion">
+            <details class="faq-item">
+              <summary>Can I cancel my subscription at any moment?</summary>
+              <p>Yes, you can downgrade or cancel your mock plan at any time with a single click. There are no contracts or cancellation fees.</p>
+            </details>
+            <details class="faq-item">
+              <summary>What audio format does Wavify use for streaming?</summary>
+              <p>Free accounts stream in clean 160kbps MP3 format. Plus and Studio tiers use AAC-LC and uncompressed 24-bit FLAC audio pipelines.</p>
+            </details>
+            <details class="faq-item">
+              <summary>How will this architecture migrate to React.js?</summary>
+              <p>Wavify's codebase is designed with a component-first architecture, decoupled state management, and clear view separation that directly maps to React hooks, components, and props.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ SECTION: ABOUT ══════════════ -->
+      <section id="secAbout" class="view-section">
+        <div class="about-container">
+          <div class="about-hero">
+            <div class="brand-wave-icon large">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <h1 class="about-title">Wavify</h1>
+            <p class="about-tagline">2nd Year Frontend Engineering Project · Aesthetic Music Platform</p>
+          </div>
+
+          <div class="about-highlights-grid">
+            <div class="about-card">
+              <i class="fa-solid fa-palette"></i>
+              <h3>Subtle Aesthetic</h3>
+              <p>Crafted with muted obsidian, warm cashmere tones, and gentle micro-animations for zero visual fatigue.</p>
+            </div>
+            <div class="about-card">
+              <i class="fa-brands fa-react"></i>
+              <h3>React-Ready Blueprint</h3>
+              <p>Modularized state, decoupled handlers, and functional UI renderers engineered for straightforward React.js migration.</p>
+            </div>
+            <div class="about-card">
+              <i class="fa-solid fa-sliders"></i>
+              <h3>Zero External Bloat</h3>
+              <p>Built exclusively using vanilla HTML5, semantic CSS3 variables, and vanilla ES6+ JavaScript.</p>
+            </div>
+            <div class="about-card">
+              <i class="fa-solid fa-shield-halved"></i>
+              <h3>Persistent Local State</h3>
+              <p>User sessions, custom playlists, and liked songs persist cleanly in browser localStorage.</p>
+            </div>
+          </div>
+
+          <div class="about-author-card">
+            <h3>Project Attribution</h3>
+            <p>Designed and built for the 2nd Year Frontend Web Development Showcase.</p>
+            <div class="author-tags">
+              <span>Frontend Architecture</span>
+              <span>HTML5 Audio API</span>
+              <span>Subtle Design System</span>
+              <span>Future React Migration</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── LYRICS / UP NEXT DRAWER ── -->
+    <aside class="lyrics-drawer" id="lyricsDrawer">
+      <div class="drawer-header">
+        <h3><i class="fa-solid fa-align-left"></i> Synced Lyrics & Queue</h3>
+        <button class="btn-icon" onclick="LyricsDrawer.toggle()" title="Close Drawer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" id="drawerTabLyrics" onclick="LyricsDrawer.switchTab('lyrics')">Lyrics</button>
+        <button class="drawer-tab" id="drawerTabQueue" onclick="LyricsDrawer.switchTab('queue')">Play Queue</button>
+      </div>
+
+      <div class="drawer-body" id="drawerLyricsBody">
+        <div class="lyrics-track-info">
+          <img id="lyricsCover" src="" alt="Album cover" />
+          <div>
+            <h4 id="lyricsSong">Track Title</h4>
+            <p id="lyricsArtist">Artist</p>
+          </div>
+        </div>
+        <div class="lyrics-scroll-area" id="lyricsLinesContainer">
+          <p class="lyrics-line active">♪ Streaming acoustic soundscape ♪</p>
+          <p class="lyrics-line">Feel every subtle beat and frequency</p>
+          <p class="lyrics-line">Pure acoustics tuned for deep listening</p>
+          <p class="lyrics-line">Wavify · Studio Master Audio</p>
+        </div>
+      </div>
+
+      <div class="drawer-body hidden" id="drawerQueueBody">
+        <div class="queue-list" id="queueListContainer">
+          <!-- Dynamically filled with current queue -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── PERSISTENT MUSIC CONTROLLER BAR ── -->
+    <footer class="bottom-player-bar" id="bottomPlayer">
+      <!-- Currently Playing Track Meta -->
+      <div class="player-left">
+        <div class="player-cover-wrap">
+          <img id="playerCoverImg" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop" alt="Album Art" />
+          <div class="player-cover-glow" id="coverGlow"></div>
+        </div>
+        <div class="player-meta-text">
+          <div class="player-title-row">
+            <span class="player-title" id="playerTitle">Select a track to play</span>
+            <span class="player-quality-tag" id="playerQualityTag">320kbps</span>
+          </div>
+          <span class="player-artist" id="playerArtist">—</span>
+        </div>
+        <button class="player-icon-btn" id="playerLikeBtn" onclick="FavoritesModule.toggleLikeCurrentSong()" title="Save to Liked Songs">
+          <i class="fa-regular fa-heart"></i>
+        </button>
+        <button class="player-icon-btn" id="playerAddPlBtn" onclick="PlaylistModule.openAddToModalCurrent()" title="Add to Playlist">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Controls & Progress Scrubber -->
+      <div class="player-center">
+        <div class="player-buttons-row">
+          <button class="player-icon-btn" id="btnShuffle" onclick="AudioPlayer.toggleShuffle()" title="Shuffle">
+            <i class="fa-solid fa-shuffle"></i>
+          </button>
+          <button class="player-icon-btn" id="btnPrev" onclick="AudioPlayer.prevTrack()" title="Previous Track">
+            <i class="fa-solid fa-backward-step"></i>
+          </button>
+          <button class="player-play-btn" id="btnMainPlay" onclick="AudioPlayer.togglePlay()" title="Play / Pause">
+            <i class="fa-solid fa-play" id="mainPlayIcon"></i>
+          </button>
+          <button class="player-icon-btn" id="btnNext" onclick="AudioPlayer.nextTrack()" title="Next Track">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+          <button class="player-icon-btn" id="btnRepeat" onclick="AudioPlayer.toggleRepeat()" title="Repeat">
+            <i class="fa-solid fa-repeat"></i>
+          </button>
+        </div>
+
+        <div class="player-scrubber-row">
+          <span class="time-label" id="timeCurrent">0:00</span>
+          <div class="scrub-track" id="scrubTrack" onclick="AudioPlayer.handleScrubClick(event)">
+            <div class="scrub-buffer" id="scrubBuffer"></div>
+            <div class="scrub-progress" id="scrubProgress"></div>
+            <div class="scrub-thumb" id="scrubThumb"></div>
+          </div>
+          <span class="time-label" id="timeDuration">0:00</span>
+        </div>
+      </div>
+
+      <!-- Volume & Secondary Tools -->
+      <div class="player-right">
+        <button class="player-icon-btn" id="btnDrawerLyrics" onclick="LyricsDrawer.toggle()" title="Lyrics & Queue">
+          <i class="fa-solid fa-align-left"></i>
+        </button>
+
+        <div class="volume-slider-wrap">
+          <button class="player-icon-btn" id="btnVolumeMute" onclick="AudioPlayer.toggleMute()" title="Mute/Unmute">
+            <i class="fa-solid fa-volume-high" id="volIcon"></i>
+          </button>
+          <input type="range" class="vol-range" id="volSlider" min="0" max="100" value="80" oninput="AudioPlayer.handleVolumeChange(this.value)" />
+          <span class="vol-label" id="volLabel">80%</span>
+        </div>
+      </div>
+
+      <!-- Native HTML5 Audio Element -->
+      <audio id="wavifyAudio" preload="metadata"></audio>
+    </footer>
+
+  </div>
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="NavigationModule.toggleMobileSidebar(false)"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="wavify.js"></script>
+</body>
+</html>
